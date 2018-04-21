@@ -3,6 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Slider, Vibration , AsyncStorage} from 'react-native';
 import GalleryScreen from 'AwesomeProject/Components/GalleryScreen';
 import isIPhoneX from 'react-native-is-iphonex';
+import vision from "react-cloud-vision-api";
 
 const landmarkSize = 2;
 
@@ -26,7 +27,6 @@ export default class CameraScreen extends React.Component {
         photoId: 1,
         showGallery: false,
         photos: [],
-        faces: [],
         permissionsGranted: false,
     };
 
@@ -36,9 +36,10 @@ export default class CameraScreen extends React.Component {
     }
 
     componentDidMount() {
-        FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'photos').catch(e => {
-            console.log(e, 'Directory exists');
-        });
+        vision.init({ auth: 'YOUR_API_KEY'})
+        // FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'photos').catch(e => {
+        //     console.log(e, 'Directory exists');
+        // });
     }
 
     getRatios = async () => {
@@ -79,94 +80,34 @@ export default class CameraScreen extends React.Component {
     takePicture = async function() {
         if (this.camera) {
             this.camera.takePictureAsync().then(data => {
-                FileSystem.moveAsync({
-                    from: data.uri,
-                    to: `${FileSystem.documentDirectory}photos/Photo_${this.state.photoId}.jpg`,
-                }).then(() => {
-                    this.setState({
-                        photoId: this.state.photoId + 1,
+                console.log(data);
+                client
+                    .labelDetection(`${data.uri}`)
+                    .then(results => {
+                        const labels = results[0].labelAnnotations;
+
+                        console.log('Labels:');
+                        labels.forEach(label => console.log(label.description));
+                    })
+                    .catch(err => {
+                        console.error('ERROR:', err);
                     });
-                    Vibration.vibrate();
-                });
+                // FileSystem.moveAsync({
+                //     from: data.uri,
+                //     to: `${FileSystem.documentDirectory}photos/Photo_${this.state.photoId}.jpg`,
+                // }).then(() => {
+                //     this.setState({
+                //         photoId: this.state.photoId + 1,
+                //     });
+                //     Vibration.vibrate();
+                // });
+
             });
         }
     };
 
-    onFacesDetected = ({ faces }) => this.setState({ faces });
-    onFaceDetectionError = state => console.warn('Faces detection error:', state);
-
     renderGallery() {
-        return <GalleryScreen onPress={this.toggleView.bind(this)} />;
-    }
-
-    renderFace({ bounds, faceID, rollAngle, yawAngle }) {
-        return (
-            <View
-                key={faceID}
-                transform={[
-                    { perspective: 600 },
-                    { rotateZ: `${rollAngle.toFixed(0)}deg` },
-                    { rotateY: `${yawAngle.toFixed(0)}deg` },
-                ]}
-                style={[
-                    styles.face,
-                    {
-                        ...bounds.size,
-                        left: bounds.origin.x,
-                        top: bounds.origin.y,
-                    },
-                ]}>
-                <Text style={styles.faceText}>ID: {faceID}</Text>
-                <Text style={styles.faceText}>rollAngle: {rollAngle.toFixed(0)}</Text>
-                <Text style={styles.faceText}>yawAngle: {yawAngle.toFixed(0)}</Text>
-            </View>
-        );
-    }
-
-    renderLandmarksOfFace(face) {
-        const renderLandmark = position =>
-            position && (
-                <View
-                    style={[
-                        styles.landmark,
-                        {
-                            left: position.x - landmarkSize / 2,
-                            top: position.y - landmarkSize / 2,
-                        },
-                    ]}
-                />
-            );
-        return (
-            <View key={`landmarks-${face.faceID}`}>
-                {renderLandmark(face.leftEyePosition)}
-                {renderLandmark(face.rightEyePosition)}
-                {renderLandmark(face.leftEarPosition)}
-                {renderLandmark(face.rightEarPosition)}
-                {renderLandmark(face.leftCheekPosition)}
-                {renderLandmark(face.rightCheekPosition)}
-                {renderLandmark(face.leftMouthPosition)}
-                {renderLandmark(face.mouthPosition)}
-                {renderLandmark(face.rightMouthPosition)}
-                {renderLandmark(face.noseBasePosition)}
-                {renderLandmark(face.bottomMouthPosition)}
-            </View>
-        );
-    }
-
-    renderFaces() {
-        return (
-            <View style={styles.facesContainer} pointerEvents="none">
-                {this.state.faces.map(this.renderFace)}
-            </View>
-        );
-    }
-
-    renderLandmarks() {
-        return (
-            <View style={styles.facesContainer} pointerEvents="none">
-                {this.state.faces.map(this.renderLandmarksOfFace)}
-            </View>
-        );
+        return <GalleryScreen onPress={this.toggleView.bind(this)}/>;
     }
 
     renderNoPermissions() {
@@ -194,9 +135,6 @@ export default class CameraScreen extends React.Component {
                 zoom={this.state.zoom}
                 whiteBalance={this.state.whiteBalance}
                 ratio={this.state.ratio}
-                faceDetectionLandmarks={Camera.Constants.FaceDetection.Landmarks.all}
-                onFacesDetected={this.onFacesDetected}
-                onFaceDetectionError={this.onFaceDetectionError}
                 focusDepth={this.state.depth}>
                 <View
                     style={{
@@ -248,8 +186,6 @@ export default class CameraScreen extends React.Component {
                         {/*<Text style={styles.flipText}> Gallery </Text>*/}
                     {/*</TouchableOpacity>*/}
                 </View>
-                {this.renderFaces()}
-                {this.renderLandmarks()}
             </Camera>
         );
     }
