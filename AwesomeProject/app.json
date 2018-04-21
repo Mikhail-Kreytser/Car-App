@@ -1,5 +1,15 @@
 {
   "expo": {
-    "sdkVersion": "26.0.0"
+    "name": "Your App Name",
+    "icon": "../AwesomeProject/Media/car.png",
+    "version": "1.0.0",
+    "slug": "your-app-slug",
+    "sdkVersion": "26.0.0",
+    "ios": {
+      "bundleIdentifier": "com.yourcompany.yourappname"
+    },
+    "android": {
+      "package": "com.yourcompany.yourappname"
+    }
   }
 }
