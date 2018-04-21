@@ -4,8 +4,13 @@ import { StyleSheet, Text, View, TouchableOpacity, Slider, Vibration , AsyncStor
 import GalleryScreen from 'AwesomeProject/Components/GalleryScreen';
 import isIPhoneX from 'react-native-is-iphonex';
 import vision from "react-cloud-vision-api";
+import { API } from 'AwesomeProject/APIkey/API'
+import ImgToBase64 from 'react-native-image-base64';
+import axios from 'react-native-axios';
+var ReadImageData = require('NativeModules').ReadImageData;
 
 const landmarkSize = 2;
+
 
 const flashModeOrder = {
     off: 'on',
@@ -36,7 +41,7 @@ export default class CameraScreen extends React.Component {
     }
 
     componentDidMount() {
-        vision.init({ auth: 'YOUR_API_KEY'})
+        // vision.init({ auth: API.Key})
         // FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'photos').catch(e => {
         //     console.log(e, 'Directory exists');
         // });
@@ -79,19 +84,60 @@ export default class CameraScreen extends React.Component {
 
     takePicture = async function() {
         if (this.camera) {
-            this.camera.takePictureAsync().then(data => {
-                console.log(data);
-                client
-                    .labelDetection(`${data.uri}`)
-                    .then(results => {
-                        const labels = results[0].labelAnnotations;
-
-                        console.log('Labels:');
-                        labels.forEach(label => console.log(label.description));
+            this.camera.takePictureAsync({base64 :true}).then(data => {
+                //console.log(data.base64);
+                axios.post('https://vision.googleapis.com/v1/images:annotate?key='+API, {
+                    "requests":[
+                        {
+                            "image":{
+                                "content":data.base64
+                            },
+                            "features":[
+                                {
+                                    "type":"IMAGE_PROPERTIES",
+                                    "maxResults":5
+                                }
+                            ]
+                        }
+                    ]
+                }).then(function (response) {
+                        console.log(response);
                     })
-                    .catch(err => {
-                        console.error('ERROR:', err);
+                    .catch(function (error) {
+                        console.log(error);
                     });
+
+                //     fetch('https://vision.googleapis.com/v1/images:annotate?key='+API, {
+                //     method: 'POST',
+                //     body:JSON.stringify({"requests":[
+                //             {
+                //                 "image":{
+                //                     "source":{
+                //                         "imageUri":
+                //                             "https://hips.hearstapps.com/amv-prod-cad-assets.s3.amazonaws.com/images/14q4/640315/2015-rolls-royce-ghost-series-ii-photo-643518-s-986x603.jpg"
+                //                     }
+                //                 },
+                //                 "features":[
+                //                     {
+                //                         "type":"WEB_DETECTION",
+                //                         "maxResults":5
+                //                     }
+                //                 ]
+                //             }
+                //         ]
+                //     }),
+                // }).then(results =>{
+                //     console.log(results);
+                // }).catch(err => {
+                //     console.error('ERROR:', err);
+                // });
+                //JSON.stringify(imageRequest)
+
+
+
+
+
+
                 // FileSystem.moveAsync({
                 //     from: data.uri,
                 //     to: `${FileSystem.documentDirectory}photos/Photo_${this.state.photoId}.jpg`,
