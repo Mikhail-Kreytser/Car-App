@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, Button, StyleSheet, View,  TouchableOpacity,Text, AsyncStorage  } from 'react-native';
-import { Camera, Permissions } from 'expo';
+import {Camera, FileSystem, Permissions} from 'expo';
 
 
 export default class HomeScreen extends React.Component{
@@ -35,7 +35,7 @@ export default class HomeScreen extends React.Component{
         return (
             <View style={{ flex: 1 }} >
                 <View style={{ flex: 1 }} >
-                    <Button title="Show me options" onPress={this._showMoreApp} />
+                    <Button title="Show me options" onPress={this._showCamera} />
                 </View>
                 <View style={{ flex: 1 }} >
                     <Button title="Actually, sign me out :)" onPress={this._signOutAsync} />
@@ -50,9 +50,8 @@ export default class HomeScreen extends React.Component{
         this.props.navigation.navigate('Auth');
     };
 
-    _showMoreApp = () => {
+    _showCamera = () => {
         this.props.navigation.navigate('Camera');
-        //this.props.navigation.navigate('DrawerToggle');
     };
 }
 
@@ -63,33 +62,3 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 });
-
-
-{/*<View style={{ flex: 1 }}>*/}
-    {/*<Camera style={{ flex: 1 }} type={this.state.type}>*/}
-        {/*<View*/}
-            {/*style={{*/}
-                {/*flex: 1,*/}
-                {/*backgroundColor: 'transparent',*/}
-                {/*flexDirection: 'row',*/}
-            {/*}}>*/}
-            {/*<TouchableOpacity*/}
-                {/*style={{*/}
-                    {/*flex: 0.1,*/}
-                    {/*alignSelf: 'flex-end',*/}
-                    {/*alignItems: 'center',*/}
-                {/*}}*/}
-                {/*onPress={() => {*/}
-                    {/*this.setState({*/}
-                        {/*type: this.state.type === Camera.Constants.Type.back*/}
-                            {/*? Camera.Constants.Type.front*/}
-                            {/*: Camera.Constants.Type.back,*/}
-                    {/*});*/}
-                {/*}}>*/}
-                {/*<Text*/}
-                    {/*style={{ fontSize: 18, marginBottom: 10, color: 'white' }}>*/}
-                    {/*{' '}Flip{' '}*/}
-                {/*</Text>*/}
-            {/*</TouchableOpacity>*/}
-        {/*</View>*/}
-    {/*</Camera>*/}

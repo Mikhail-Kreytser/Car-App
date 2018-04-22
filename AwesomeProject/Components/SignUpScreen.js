@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Alert, ActivityIndicator, AsyncStorage, Button, StatusBar, StyleSheet, View, Text, ScrollView, TextInput} from 'react-native';
+import {Alert, ActivityIndicator, AsyncStorage, Button, StatusBar, StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity} from 'react-native';
 // import {URL, API, LOGIN, USER, CREATE} from '../Urls/API'
 // import axios from 'react-native-axios'
 
@@ -36,6 +36,10 @@ export default class SignInScreen extends React.Component {
     _signUp = () => {
         this.props.navigation.navigate('SignUp');
     }
+    _signin= () => {
+        this.props.navigation.navigate('App');
+        this.props.navigation.navigate('SignIn');
+    }
 
     render() {
         return (
@@ -69,6 +73,14 @@ export default class SignInScreen extends React.Component {
                             onPress={this._signInAsync}
                             title="Submit"
                         />
+                        <View style={{margin:7}} />
+                        <View style={{flex: 1, justifyContent : 'flex-end'}}>
+                            <TouchableOpacity onPress={this._signin} >
+                                <Text style={{paddingLeft:'80%'}}>
+                                    Login
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </ScrollView>
                 </View>
                 <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center'}}>

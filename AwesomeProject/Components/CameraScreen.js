@@ -1,17 +1,13 @@
 import { Constants, Camera, FileSystem, Permissions } from 'expo';
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Slider, Vibration , AsyncStorage} from 'react-native';
-import GalleryScreen from 'AwesomeProject/Components/GalleryScreen';
+import { StyleSheet, Text, View, TouchableOpacity, Slider, Vibration ,Button, AsyncStorage} from 'react-native';
+import { RNS3 } from 'react-native-aws3';
+//import GalleryScreen from 'AwesomeProject/Components/GalleryScreen';
 import isIPhoneX from 'react-native-is-iphonex';
-import vision from "react-cloud-vision-api";
-import { API } from 'AwesomeProject/APIkey/API'
-import ImgToBase64 from 'react-native-image-base64';
+import { SECRET_KEY, ACCESSKEY, BUCKET, API } from 'AwesomeProject/APIkey/API';
 import axios from 'react-native-axios';
-var ReadImageData = require('NativeModules').ReadImageData;
 
 const landmarkSize = 2;
-
-
 const flashModeOrder = {
     off: 'on',
     on: 'auto',
@@ -42,9 +38,9 @@ export default class CameraScreen extends React.Component {
 
     componentDidMount() {
         // vision.init({ auth: API.Key})
-        // FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'photos').catch(e => {
-        //     console.log(e, 'Directory exists');
-        // });
+        FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'photos').catch(e => {
+            console.log(e, 'Directory exists');
+        });
     }
 
     getRatios = async () => {
@@ -81,80 +77,170 @@ export default class CameraScreen extends React.Component {
             depth,
         });
     }
+    sendPost = async function(base64String){
+        console.log(base64String)
+        // axios.post('https://vision.googleapis.com/v1/images:annotate?key='+API, {
+        //     "requests":[
+        //         {
+        //             "image":{
+        //                 "content":base64String
+        //             },
+        //             "features":[
+        //                 {
+        //                     "type":"IMAGE_PROPERTIES",
+        //                     "maxResults":5
+        //                 }
+        //             ]
+        //         }
+        //     ]
+        // }).then(function (response) {
+        //     console.log(response);
+        // })
+        //     .catch(function (error) {
+        //         console.log(error);
+        //     });
+    }
 
     takePicture = async function() {
         if (this.camera) {
-            this.camera.takePictureAsync({base64 :true}).then(data => {
-                //console.log(data.base64);
-                axios.post('https://vision.googleapis.com/v1/images:annotate?key='+API, {
-                    "requests":[
-                        {
-                            "image":{
-                                "content":data.base64
-                            },
-                            "features":[
+            this.camera.takePictureAsync({base64 :true, quality:0}).then(data => {
+                const file = {
+                    // `uri` can also be a file system path (i.e. file://)
+                    uri: data.uri,
+                    name: "Photo_1.jpg",
+                    type: "image/jpg"
+                }
+//"assets-library://asset/asset.PNG?id=655DBE66-8008-459C-9358-914E1FB532DD&ext=PNG",
+                const options = {
+                    keyPrefix: "uploads/",
+                    bucket: BUCKET,
+                    region: "us-east-1",
+                    accessKey: ACCESSKEY,
+                    secretKey: SECRET_KEY,
+                    successActionStatus: 201
+                }
+
+                RNS3.put(file, options).then(response => {
+                    if (response.status !== 201)
+                        throw new Error("Failed to upload image to S3");
+                    console.log(response.body.postResponse.location);
+                    axios.post('https://vision.googleapis.com/v1/images:annotate?key='+API, {
+                            "requests":[
                                 {
-                                    "type":"IMAGE_PROPERTIES",
-                                    "maxResults":5
+                                    "image":{
+                                        "source":{
+                                            "imageUri": response.body.postResponse.location
+                                        }
+                                    },
+
+                                    "features":[
+                                        {
+                                            "type":"WEB_DETECTION",
+                                            "maxResults":10
+                                        },
+                                        {
+                                            "type":"LABEL_DETECTION",
+                                            "maxResults":10
+                                        }
+                                    ]
                                 }
                             ]
-                        }
-                    ]
-                }).then(function (response) {
-                        console.log(response);
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                        }).then(function (response) {
+                            console.log(response.data);
+                            axios.post('http://10.200.1.39:3001/api/parsecarstats',response.data)
+                                .then(function(api_response){
+                                    console.log(api_response)
+                                })
+                                .catch(function(err){
+                            console.log(err);
+                        })
 
-                //     fetch('https://vision.googleapis.com/v1/images:annotate?key='+API, {
+                        })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                });
+
+
+//                 axios.post('http://10.200.1.39:3001/api/sign_s3/', {
+//                     fileName: `${this.state.photoId}`,
+//                     fileType: 'jpg',
+//                 }).then(function (response){
+
+
+                    // FileSystem.moveAsync({
+                    //     from: data.uri,
+                    //     to: `${FileSystem.documentDirectory}photos/Photo_1.jpg`,
+                    // }).then(() => {
+
+
+                    //     let options = {
+                    //         header : {
+                    //             'Content-Type': 'jpg'
+                    //         }
+                    //     };
+                    //      console.log(response.data.data.returnData.signedRequest)
+                    //     axios.put(response.data.data.returnData.signedRequest,
+                    //         data.uri,
+                    //         options
+                    //     ).then((response) => {
+                    //         console.log(response)
+                    //     }).catch((err)=>{
+                    //         console.log("HERE")
+                    //         console.log(err)
+                    //     })
+                    // }).catch(err=>{
+                    //     console.log(err)
+                    // })
+
+
+                //
+                //         // console.log();
+                //     })
+                //     .catch(function (error) {
+                //         console.log(error);
+                //     });
+                // fetch('http://10.200.1.39:3001/api/sign_s3/', {
                 //     method: 'POST',
-                //     body:JSON.stringify({"requests":[
-                //             {
-                //                 "image":{
-                //                     "source":{
-                //                         "imageUri":
-                //                             "https://hips.hearstapps.com/amv-prod-cad-assets.s3.amazonaws.com/images/14q4/640315/2015-rolls-royce-ghost-series-ii-photo-643518-s-986x603.jpg"
-                //                     }
-                //                 },
-                //                 "features":[
-                //                     {
-                //                         "type":"WEB_DETECTION",
-                //                         "maxResults":5
-                //                     }
-                //                 ]
-                //             }
-                //         ]
+                //     body: JSON.stringify({
+                //         fileName: `${this.state.photoId}`,
+                //         fileType: 'jpg',
                 //     }),
-                // }).then(results =>{
-                //     console.log(results);
-                // }).catch(err => {
-                //     console.error('ERROR:', err);
+                // }).then((response)=>{
+                //     console.log(response);
+                // }).catch((err)=>{
+                //     console.log(err);
                 // });
-                //JSON.stringify(imageRequest)
 
-
-
-
-
+                // headers: {
+                //     Accept: 'application/json',
+                //         'Content-Type': 'application/json',
+                // },
 
                 // FileSystem.moveAsync({
                 //     from: data.uri,
                 //     to: `${FileSystem.documentDirectory}photos/Photo_${this.state.photoId}.jpg`,
                 // }).then(() => {
+                //     ImgToBase64.getBase64String(`${FileSystem.documentDirectory}photos/Photo_${this.state.photoId}.jpg`)
+                //         .then(base64String => {console.log(base64String)})
+                //         .catch(err => {console.log(err)});
                 //     this.setState({
                 //         photoId: this.state.photoId + 1,
                 //     });
                 //     Vibration.vibrate();
+                // }).catch(err =>{
+                //     console.log(err)
                 // });
+                // console.log(this.state.photoId)
 
             });
+
         }
     };
 
-    renderGallery() {
-        return <GalleryScreen onPress={this.toggleView.bind(this)}/>;
-    }
+    // renderGallery() {
+    //     return <GalleryScreen onPress={this.toggleView.bind(this)}/>;
+    // }
 
     renderNoPermissions() {
         return (
@@ -165,6 +251,10 @@ export default class CameraScreen extends React.Component {
             </View>
         );
     }
+    _signOutAsync = async () => {
+        await AsyncStorage.clear();
+        this.props.navigation.navigate('Auth');
+    };
 
     renderCamera() {
         return (
@@ -173,7 +263,7 @@ export default class CameraScreen extends React.Component {
                     this.camera = ref;
                 }}
                 style={{
-                    flex: 1,
+                    flex: 6,
                 }}
                 type={this.state.type}
                 flashMode={this.state.flash}
@@ -195,6 +285,11 @@ export default class CameraScreen extends React.Component {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.flipButton} onPress={this.toggleFlash.bind(this)}>
                         <Text style={styles.flipText}> FLASH: {this.state.flash} </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.flipButton}
+                        onPress={this._signOutAsync}>
+                        <Text style={styles.flipText}> Sign Out </Text>
                     </TouchableOpacity>
                 </View>
                 <View
@@ -226,21 +321,21 @@ export default class CameraScreen extends React.Component {
                         onPress={this.takePicture.bind(this)}>
                         <Text style={styles.flipText}> SNAP </Text>
                     </TouchableOpacity>
-                    {/*<TouchableOpacity*/}
-                        {/*style={[styles.flipButton, styles.galleryButton, { flex: 0.25, alignSelf: 'flex-end' }]}*/}
-                        {/*onPress={this.toggleView.bind(this)}>*/}
-                        {/*<Text style={styles.flipText}> Gallery </Text>*/}
-                    {/*</TouchableOpacity>*/}
                 </View>
             </Camera>
         );
     }
 
+
+// <View style={{ flex: 1 }} >
+// <Button title="Actually, sign me out :)" onPress={this._signOutAsync} />
+// </View>
     render() {
         const cameraScreenContent = this.state.permissionsGranted
             ? this.renderCamera()
             : this.renderNoPermissions();
-        const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
+        // const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
+        const content = cameraScreenContent
         return <View style={styles.container}>{content}</View>;
     }
 }
