@@ -118,7 +118,7 @@
 // });
 
 import React, { Component } from 'react';
-import {Alert, ActivityIndicator, AsyncStorage, Button, StatusBar, StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity} from 'react-native';
+import {Alert, ActivityIndicator, AsyncStorage, Button,ImageBackground, StatusBar, StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity} from 'react-native';
 import {StackNavigator, SwitchNavigator } from 'react-navigation';
 //import {URL, API, LOGIN, USER, CREATE} from '../Urls/API'
 //import axios from 'react-native-axios'
@@ -141,6 +141,10 @@ export default class SignInScreen extends React.Component {
 
     render() {
         return (
+            <ImageBackground style={{
+                width:'100%',
+                height:'100%',
+            }} source={require('AwesomeProject/Media/blurredbackground.png')}>
             <View style={styles.container}>
                 <View  style={{minWidth: '100%'}}>
                     <ScrollView style={{padding: 60}}>
@@ -177,6 +181,7 @@ export default class SignInScreen extends React.Component {
                     </ScrollView>
                 </View>
             </View>
+            </ImageBackground>
         );
     }
     _signUp = () => {

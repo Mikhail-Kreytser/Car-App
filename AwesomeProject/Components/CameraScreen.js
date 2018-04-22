@@ -31,6 +31,10 @@ export default class CameraScreen extends React.Component {
         permissionsGranted: false,
     };
 
+    static navigationOptions = {
+        header: null,
+    };
+
     async componentWillMount() {
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
         this.setState({ permissionsGranted: status === 'granted' });
@@ -380,7 +384,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     picButton: {
-        backgroundColor: 'darkseagreen',
+        //backgroundColor: 'darkseagreen',
     },
     galleryButton: {
         backgroundColor: 'indianred',

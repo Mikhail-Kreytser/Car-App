@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Alert, ActivityIndicator, AsyncStorage, Button, KeyboardAvoidingView , StyleSheet, View, Text, ScrollView, TextInput} from 'react-native';
+import {Alert, ActivityIndicator, AsyncStorage, Button, ImageBackground,KeyboardAvoidingView , Image,StyleSheet, View, Text, ScrollView, TextInput} from 'react-native';
 import {StackNavigator, SwitchNavigator } from 'react-navigation';
 
 export default class SignInScreen extends React.Component {
@@ -20,31 +20,34 @@ export default class SignInScreen extends React.Component {
 
     render() {
         return (
-            <View style={styles.container}>
-                <View style={{ flex: 1 }}>
-                    <Text style={{fontSize: 60, paddingTop:60}}>
-                        CarTure AI
-                    </Text>
-                </View>
-                <View  style={{minWidth: '100%',  flex: 1 }}>
-                    <ScrollView style={{padding: 60, minWidth: '100%' }}>
+            <ImageBackground style={{
+                width:'100%',
+                height:'100%',
+            }} source={require('AwesomeProject/Media/blurredbackground.png')}>
+                <View style={styles.container}>
+                    <View style={{ flex: 1 }}>
+                        <Image
+                            style={{width: 300, height: 300}}
+                            source={require('AwesomeProject/Media/Logo.png')}
+                        />
+                    </View>
+                    <View  style={{minWidth: '100%',  flex: 1 }}>
+                        <ScrollView style={{padding: 60, minWidth: '100%' }}>
 
-                        <View style={{margin:7}} />
-                        <Button
-                            onPress={this._signInAsync}
-                            title="Sign In"
-                        />
-                        <View style={{margin:7}} />
-                        <Button
-                            onPress={this._signUp}
-                            title="Sign Up"
-                        />
-                    </ScrollView>
+                            <View style={{margin:7}} />
+                            <Button
+                                onPress={this._signInAsync}
+                                title="Sign In"
+                            />
+                            <View style={{margin:7}} />
+                            <Button
+                                onPress={this._signUp}
+                                title="Sign Up"
+                            />
+                        </ScrollView>
+                    </View>
                 </View>
-                <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center'}}>
-                    <ActivityIndicator animating ={this.state.loading} size={100} color='white' />
-                </View>
-            </View>
+            </ImageBackground>
         );
     }
     _signUp = () => {
