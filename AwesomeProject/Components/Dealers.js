@@ -1,17 +1,20 @@
 import React from 'react';
 import Dealer from './Dealer'
-import { Image, Button, StyleSheet, View,  TouchableOpacity,Text, AsyncStorage  } from 'react-native';
+import { Image, Button, StyleSheet, View,ScrollView,  TouchableOpacity,Text, AsyncStorage  } from 'react-native';
 class Dealers extends React.Component {
     render() {
         return (
             <View>
+                <ScrollView>
                 {this.props.dealers
-                    // .sort((playerA, playerB) => {
-                    //     return parseInt(playerA.score, 10) < parseInt(playerB.score, 10);
-                    // })
+                    // .sort((dealerA, dealerB) => {
+                        // return parseInt(dealerA.price,10) < parseInt(dealerB.price, 10)
+                        // return dealerA.price > dealerB.price;
+                    //})
                     .map((dealer, index) => {
-                    return <Dealer key={index} rank={index + 1} dealer={dealer} />;
+                        return  <Dealer key={index} dealer={dealer} /> ;
                 })}
+                </ScrollView>
             </View>
         );
     }

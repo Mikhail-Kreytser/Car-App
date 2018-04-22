@@ -4,7 +4,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Slider, Image, Vibration ,But
 import { RNS3 } from 'react-native-aws3';
 //import GalleryScreen from 'AwesomeProject/Components/GalleryScreen';
 import isIPhoneX from 'react-native-is-iphonex';
-import { SECRET_KEY, ACCESSKEY, BUCKET, API } from 'AwesomeProject/APIkey/API';
+import { SECRET_KEY,SIGHTHOUND, ACCESSKEY, BUCKET, API } from 'AwesomeProject/APIkey/API';
 import axios from 'react-native-axios';
 
 const landmarkSize = 2;
@@ -81,29 +81,6 @@ export default class CameraScreen extends React.Component {
             depth,
         });
     }
-    sendPost = async function(base64String){
-        console.log(base64String)
-        // axios.post('https://vision.googleapis.com/v1/images:annotate?key='+API, {
-        //     "requests":[
-        //         {
-        //             "image":{
-        //                 "content":base64String
-        //             },
-        //             "features":[
-        //                 {
-        //                     "type":"IMAGE_PROPERTIES",
-        //                     "maxResults":5
-        //                 }
-        //             ]
-        //         }
-        //     ]
-        // }).then(function (response) {
-        //     console.log(response);
-        // })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //     });
-    }
 
     takePicture = async function() {
         if (this.camera) {
@@ -148,7 +125,7 @@ export default class CameraScreen extends React.Component {
                                     ]
                                 }
                             ]
-                        }).then(function (response) {
+                    }).then(function (response) {
                             console.log(response.data);
                             axios.post('http://10.200.1.39:3001/api/parsecarstats',response.data)
                                 .then(function(api_response){
@@ -163,64 +140,12 @@ export default class CameraScreen extends React.Component {
                             .catch(function (error) {
                                 console.log(error);
                             });
-                    this.props.navigation.navigate('Result');
                 });
-
-
-//                 axios.post('http://10.200.1.39:3001/api/sign_s3/', {
-//                     fileName: `${this.state.photoId}`,
-//                     fileType: 'jpg',
-//                 }).then(function (response){
-
 
                     // FileSystem.moveAsync({
                     //     from: data.uri,
                     //     to: `${FileSystem.documentDirectory}photos/Photo_1.jpg`,
                     // }).then(() => {
-
-
-                    //     let options = {
-                    //         header : {
-                    //             'Content-Type': 'jpg'
-                    //         }
-                    //     };
-                    //      console.log(response.data.data.returnData.signedRequest)
-                    //     axios.put(response.data.data.returnData.signedRequest,
-                    //         data.uri,
-                    //         options
-                    //     ).then((response) => {
-                    //         console.log(response)
-                    //     }).catch((err)=>{
-                    //         console.log("HERE")
-                    //         console.log(err)
-                    //     })
-                    // }).catch(err=>{
-                    //     console.log(err)
-                    // })
-
-
-                //
-                //         // console.log();
-                //     })
-                //     .catch(function (error) {
-                //         console.log(error);
-                //     });
-                // fetch('http://10.200.1.39:3001/api/sign_s3/', {
-                //     method: 'POST',
-                //     body: JSON.stringify({
-                //         fileName: `${this.state.photoId}`,
-                //         fileType: 'jpg',
-                //     }),
-                // }).then((response)=>{
-                //     console.log(response);
-                // }).catch((err)=>{
-                //     console.log(err);
-                // });
-
-                // headers: {
-                //     Accept: 'application/json',
-                //         'Content-Type': 'application/json',
-                // },
 
                 // FileSystem.moveAsync({
                 //     from: data.uri,
@@ -239,8 +164,9 @@ export default class CameraScreen extends React.Component {
                 // console.log(this.state.photoId)
 
             });
- 
+
         }
+        this.props.navigation.navigate('Result');
     };
 
     // renderGallery() {
@@ -335,9 +261,6 @@ export default class CameraScreen extends React.Component {
     }
 
 
-// <View style={{ flex: 1 }} >
-// <Button title="Actually, sign me out :)" onPress={this._signOutAsync} />
-// </View>
     render() {
         const cameraScreenContent = this.state.permissionsGranted
             ? this.renderCamera()

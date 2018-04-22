@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     },
 });
 
-const AppStack = StackNavigator({  Camera: CameraScreen, Home: HomeScreen, Result:ResultScreen });
+const AppStack = StackNavigator({ Camera: CameraScreen, Home: HomeScreen,  Result:ResultScreen});
 const AuthStack = StackNavigator({Splash: SplashScreen, SignIn: SignInScreen , SignUp: SignUpScreen });
 
 export default SwitchNavigator(
