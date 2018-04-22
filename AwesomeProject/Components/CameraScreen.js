@@ -114,7 +114,6 @@ export default class CameraScreen extends React.Component {
                     name: "Photo_1.jpg",
                     type: "image/jpg"
                 }
-//"assets-library://asset/asset.PNG?id=655DBE66-8008-459C-9358-914E1FB532DD&ext=PNG",
                 const options = {
                     keyPrefix: "uploads/",
                     bucket: BUCKET,
@@ -154,6 +153,7 @@ export default class CameraScreen extends React.Component {
                             axios.post('http://10.200.1.39:3001/api/parsecarstats',response.data)
                                 .then(function(api_response){
                                     console.log(api_response)
+
                                 })
                                 .catch(function(err){
                             console.log(err);
@@ -163,6 +163,7 @@ export default class CameraScreen extends React.Component {
                             .catch(function (error) {
                                 console.log(error);
                             });
+                    this.props.navigation.navigate('Result');
                 });
 
 
