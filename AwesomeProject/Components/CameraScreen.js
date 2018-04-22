@@ -239,7 +239,7 @@ export default class CameraScreen extends React.Component {
                 // console.log(this.state.photoId)
 
             });
-
+ 
         }
     };
 
