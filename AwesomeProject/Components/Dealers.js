@@ -6,13 +6,15 @@ class Dealers extends React.Component {
         return (
             <View>
                 <ScrollView>
+                    {console.log("here")}
+                    {console.log(this.props.deals)}
                 {this.props.dealers
                     // .sort((dealerA, dealerB) => {
                         // return parseInt(dealerA.price,10) < parseInt(dealerB.price, 10)
                         // return dealerA.price > dealerB.price;
                     //})
-                    .map((dealer, index) => {
-                        return  <Dealer key={index} dealer={dealer} /> ;
+                    .map((deal, index) => {
+                        return  <Dealer key={index} dealer={deal} /> ;
                 })}
                 </ScrollView>
             </View>

@@ -4,7 +4,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Slider, Image, ActivityIndica
 import { RNS3 } from 'react-native-aws3';
 //import GalleryScreen from 'AwesomeProject/Components/GalleryScreen';
 import isIPhoneX from 'react-native-is-iphonex';
-import { SECRET_KEY,SIGHTHOUND, ACCESSKEY, BUCKET, API } from 'AwesomeProject/APIkey/API';
+import { SECRET_KEY,SIGHTHOUND, ACCESSKEY, BUCKET, API, BACK_END } from 'AwesomeProject/APIkey/API';
 import axios from 'react-native-axios';
 import ResultScreen from "./ResultScreen";
 
@@ -17,31 +17,43 @@ const flashModeOrder = {
 };
 
 export default class CameraScreen extends React.Component {
-    state = {
-        flash: 'off',
-        zoom: 0,
-        autoFocus: 'on',
-        depth: 0,
-        type: 'back',
-        whiteBalance: 'auto',
-        ratio: '16:9',
-        ratios: [],
-        photoId: 1,
-        showGallery: false,
-        photos: [],
-        permissionsGranted: false,
-        loading : false,
-        showResult: false,
-    };
+    constructor(props){
+        super(props);
+        this.takePicture = this.takePicture.bind(this);
+        // this.toggleFacing = this.toggleFacing.bind(this)
+        this.toggleFlash = this.toggleFlash.bind(this)
+        this.setFocusDepth = this.setFocusDepth.bind(this)
+        this.renderCamera = this.renderCamera.bind(this)
+        this.state = {
+            flash: 'off',
+            zoom: 0,
+            autoFocus: 'on',
+            depth: 0,
+            type: 'back',
+            whiteBalance: 'auto',
+            ratio: '16:9',
+            ratios: [],
+            photoId: 1,
+            showGallery: false,
+            photos: [],
+            permissionsGranted: true,
+            loading : false,
+            showResult: false,
+            results :{url: "", model : "",doors: 4, mpg : 40, engine: "V8", description: "A Car"},
+            deals:[]
+        }
+        changeState = this.changeState.bind(this);
+        // this.componentWillMount();
+    }
 
     static navigationOptions = {
         header: null,
     };
-
-    async componentWillMount() {
-        const { status } = await Permissions.askAsync(Permissions.CAMERA);
-        this.setState({ permissionsGranted: status === 'granted' });
-    }
+    //componentWillMount = async () => {
+    // async componentWillMount() {
+    //     const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    //     this.setState({ permissionsGranted: status === 'granted' });
+    // }
 
     componentDidMount() {
         // vision.init({ auth: API.Key})
@@ -55,16 +67,15 @@ export default class CameraScreen extends React.Component {
         return ratios;
     };
 
-    toggleView() {
-        this.setState({
-            showGallery: !this.state.showGallery,
-        });
-    }
-
-    toggleFacing() {
-        this.setState({
-            type: this.state.type === 'back' ? 'front' : 'back',
-        });
+    // toggleFacing() {
+    //     this.setState({
+    //         type: this.state.type === 'back' ? 'front' : 'back',
+    //     });
+    // }
+    changeState(result,data_deal) {
+        const data_deals = this.state.deals.concat(data_deal);
+        this.setState({results: result, deals: data_deals, showResult: true});
+        console.log(this.state.data_deals)
     }
 
     toggleFlash() {
@@ -73,17 +84,12 @@ export default class CameraScreen extends React.Component {
         });
     }
 
-    setRatio(ratio) {
-        this.setState({
-            ratio,
-        });
-    }
-
     setFocusDepth(depth) {
         this.setState({
             depth,
         });
     }
+
 
     // _nextPage = () {
     //     this.setState({loading :false});
@@ -154,16 +160,37 @@ export default class CameraScreen extends React.Component {
 
                     function loadEnd(e) {
                         console.log(result);
-                        axios.post('http://10.200.1.39:3001/api/parsecarstats',result)
+                        // fetch(BACK_END, {
+                        //     method: 'POST',
+                        //     headers: {
+                        //         Accept: 'application/json',
+                        //         'Content-Type': 'application/json',
+                        //     },
+                        //     body: result,
+                        // }).then(function(api_response){
+                        //     console.log(api_response)
+                        //     // AsyncStorage.setItem('searchResult', `${result}`);
+                        // }).catch(function(err){
+                        //         console.log(err);
+                        //         // AsyncStorage.setItem('searchResult', `${result}`);
+                        //     })
+                        axios.post(BACK_END,result,{headers: {
+                                Accept: 'application/json',
+                                'Content-Type': 'application/json',
+                            }})
                             .then(function(api_response){
-                                console.log(api_response)
-                                // AsyncStorage.setItem('searchResult', `${result}`);
+                                console.log(api_response.data.data.deals)
+                                this.changeState(api_response.data.data.vehicleData, api_response.data.data.deals)
+                                //this.props.navigation.navigate('Result');
+                                // this.setState({results: api_response.data.data.vehicleData,showResult: true})
+                                //AsyncStorage.setItem('searchResult', `${result}`);
                             })
                             .catch(function(err){
                                 console.log(err);
                                 // AsyncStorage.setItem('searchResult', `${result}`);
                             })
                     }
+
 
                     xmlhttp.open("POST", "https://dev.sighthoundapi.com/v1/recognition?objectType=vehicle");
                     xmlhttp.setRequestHeader("Content-type", "application/json");
@@ -198,6 +225,8 @@ export default class CameraScreen extends React.Component {
                         //     .catch(function (error) {
                         //         console.log(error);
                         //     });
+
+                    // this.setState({showResult: true})
                 });
 
                     // FileSystem.moveAsync({
@@ -230,8 +259,41 @@ export default class CameraScreen extends React.Component {
     //     return <GalleryScreen onPress={this.toggleView.bind(this)}/>;
     // }
 
+    _back(val){
+        this.setState({showResult:val});
+    }
+
     renderResult() {
-        return <ResultScreen/>;
+        return <ResultScreen deals = {this.state.deals} results={this.state.results}/>;
+        // return <ResultScreen results={{
+        //     dealers: [{
+        //         name: "Bay Ridge Honda",
+        //         location: "Bay Ridge",
+        //         hours: "9am - 5pm",
+        //         number: "(718) 123 4567",
+        //         price: 175
+        //     },{
+        //         name: "Hill Side Honda",
+        //         location: "Hill Side",
+        //         hours: "9am - 5pm",
+        //         number: "(505) 904 1032",
+        //         price: 195
+        //     },{
+        //         name: "Orange County Honda",
+        //         location: "Orange County",
+        //         hours: "9am - 5pm",
+        //         number: "(921) 004 6780",
+        //         price: 180
+        //     }],
+        //     vehicle:{
+        //         make: "Honda",
+        //         model: "Civic",
+        //         type: "Sedan",
+        //         description: "It is a Car.",
+        //         imgSource: "http://shop.honda.com/images/2018/civic-sedan/shop/jelly-civicsedan.png",
+        //     }
+        // }}/>;
+
     }
 
     renderNoPermissions() {
@@ -272,9 +334,9 @@ export default class CameraScreen extends React.Component {
                         justifyContent: 'space-around',
                         paddingTop: Constants.statusBarHeight / 2,
                     }}>
-                    <TouchableOpacity style={styles.flipButton} onPress={this.toggleFacing.bind(this)}>
-                        <Text style={styles.flipText}> FLIP </Text>
-                    </TouchableOpacity>
+                    {/*<TouchableOpacity style={styles.flipButton} onPress={this.toggleFacing.bind(this)}>*/}
+                        {/*<Text style={styles.flipText}> FLIP </Text>*/}
+                    {/*</TouchableOpacity>*/}
                     <TouchableOpacity style={styles.flipButton} onPress={this.toggleFlash.bind(this)}>
                         <Text style={styles.flipText}> FLASH: {this.state.flash} </Text>
                     </TouchableOpacity>
@@ -310,7 +372,7 @@ export default class CameraScreen extends React.Component {
                     }}>
                     <TouchableOpacity
                         style={[ styles.picButton, { flex: 0.3, alignSelf: 'flex-end' }]}
-                        onPress={this.takePicture.bind(this)}>
+                        onPress={this.takePicture}>
                         {/*<Text style={styles.flipText}> SNAP </Text>*/}
                         <Image style={{
                             height: 80,resizeMode:'center'}}
@@ -327,14 +389,15 @@ export default class CameraScreen extends React.Component {
 
 
     render() {
-        const cameraScreenContent = this.state.permissionsGranted
-            ? this.renderCamera()
-            : this.renderNoPermissions();
+        // const cameraScreenContent = this.state.permissionsGranted
+        //     ? this.renderCamera()
+        //     : this.renderNoPermissions();
+        const cameraScreenContent = this.renderCamera();
         // const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
         //const content = cameraScreenContent
         const content = this.state.showResult ? this.renderResult() : cameraScreenContent;
 
-        return <View style={styles.container}>{content}</View>;
+        return content//<View style={styles.container}>{content}</View>;
     }
 }
 
