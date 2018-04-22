@@ -1,6 +1,6 @@
 import { Constants, Camera, FileSystem, Permissions } from 'expo';
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Slider, Vibration ,Button, AsyncStorage} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Slider, Image, Vibration ,Button, AsyncStorage} from 'react-native';
 import { RNS3 } from 'react-native-aws3';
 //import GalleryScreen from 'AwesomeProject/Components/GalleryScreen';
 import isIPhoneX from 'react-native-is-iphonex';
@@ -321,9 +321,12 @@ export default class CameraScreen extends React.Component {
                         alignSelf: 'center',
                     }}>
                     <TouchableOpacity
-                        style={[styles.flipButton, styles.picButton, { flex: 0.3, alignSelf: 'flex-end' }]}
+                        style={[ styles.picButton, { flex: 0.3, alignSelf: 'flex-end' }]}
                         onPress={this.takePicture.bind(this)}>
-                        <Text style={styles.flipText}> SNAP </Text>
+                        {/*<Text style={styles.flipText}> SNAP </Text>*/}
+                        <Image style={{
+                            height: 80,resizeMode:'center'}}
+                            source={require('AwesomeProject/Media/Bulb.png')}/>
                     </TouchableOpacity>
                 </View>
             </Camera>

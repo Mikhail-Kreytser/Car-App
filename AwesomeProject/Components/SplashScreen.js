@@ -17,14 +17,20 @@ export default class SignInScreen extends React.Component {
         header: null,
         title: 'Please sign in',
     };
-
+// <ImageBackground style={{
+//     width:'100%',
+//     height:'100%',
+// }} source={require('AwesomeProject/Media/blurredbackground.png')}>
     render() {
         return (
-            <ImageBackground style={{
-                width:'100%',
-                height:'100%',
-            }} source={require('AwesomeProject/Media/blurredbackground.png')}>
+            <View>
+                <Image style={{
+                    width:'100%',
+                    height:'100%',
+                    opacity: 0.7,
+                }} source={require('AwesomeProject/Media/blurredbackground.png')}/>
                 <View style={styles.container}>
+
                     <View style={{ flex: 1 }}>
                         <Image
                             style={{width: 300, height: 300}}
@@ -47,7 +53,8 @@ export default class SignInScreen extends React.Component {
                         </ScrollView>
                     </View>
                 </View>
-            </ImageBackground>
+            </View>
+            // </ImageBackground>
         );
     }
     _signUp = () => {
@@ -55,7 +62,6 @@ export default class SignInScreen extends React.Component {
     }
 
     _signInAsync = async () => {
-        console.log("here")
         this.props.navigation.navigate('SignIn');
     };
 }
@@ -66,5 +72,10 @@ const styles = StyleSheet.create({
         flexDirection:'column',
         alignItems: 'center',
         justifyContent: 'center',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
     },
 });

@@ -118,7 +118,7 @@
 // });
 
 import React, { Component } from 'react';
-import {Alert, ActivityIndicator, AsyncStorage, Button,ImageBackground, StatusBar, StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity} from 'react-native';
+import {Alert, ActivityIndicator, AsyncStorage, Button,ImageBackground, Image,StatusBar, StyleSheet, View, Text, ScrollView, TextInput, TouchableOpacity} from 'react-native';
 import {StackNavigator, SwitchNavigator } from 'react-navigation';
 //import {URL, API, LOGIN, USER, CREATE} from '../Urls/API'
 //import axios from 'react-native-axios'
@@ -134,6 +134,7 @@ export default class SignInScreen extends React.Component {
         };
     }
     static navigationOptions = {
+        header: null,
         title: 'Please sign in',
     };
 
@@ -141,10 +142,12 @@ export default class SignInScreen extends React.Component {
 
     render() {
         return (
-            <ImageBackground style={{
+            <View>
+            <Image style={{
                 width:'100%',
                 height:'100%',
-            }} source={require('AwesomeProject/Media/blurredbackground.png')}>
+                opacity: 0.7,
+            }} source={require('AwesomeProject/Media/blurredbackground.png')}/>
             <View style={styles.container}>
                 <View  style={{minWidth: '100%'}}>
                     <ScrollView style={{padding: 60}}>
@@ -181,7 +184,7 @@ export default class SignInScreen extends React.Component {
                     </ScrollView>
                 </View>
             </View>
-            </ImageBackground>
+            </View>
         );
     }
     _signUp = () => {
@@ -200,5 +203,10 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
     },
 });

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Your App Name",
     "icon": "../AwesomeProject/Media/car.png",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "slug": "your-app-slug",
     "sdkVersion": "26.0.0",
     "ios": {
