@@ -1,11 +1,12 @@
 import { Constants, Camera, FileSystem, Permissions } from 'expo';
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Slider, Image, Vibration ,Button, AsyncStorage} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Slider, Image, ActivityIndicator,Vibration ,Button, AsyncStorage} from 'react-native';
 import { RNS3 } from 'react-native-aws3';
 //import GalleryScreen from 'AwesomeProject/Components/GalleryScreen';
 import isIPhoneX from 'react-native-is-iphonex';
 import { SECRET_KEY,SIGHTHOUND, ACCESSKEY, BUCKET, API } from 'AwesomeProject/APIkey/API';
 import axios from 'react-native-axios';
+import ResultScreen from "./ResultScreen";
 
 const landmarkSize = 2;
 const flashModeOrder = {
@@ -29,6 +30,8 @@ export default class CameraScreen extends React.Component {
         showGallery: false,
         photos: [],
         permissionsGranted: false,
+        loading : false,
+        showResult: false,
     };
 
     static navigationOptions = {
@@ -82,6 +85,16 @@ export default class CameraScreen extends React.Component {
         });
     }
 
+    // _nextPage = () {
+    //     this.setState({loading :false});
+    //     this.props.navigation.navigate('Result');
+    // }
+
+    // _nextPage = () => {
+    //     this.setState({loading :false});
+    //     this.props.navigation.navigate('Result');
+    // };
+
     takePicture = async function() {
         if (this.camera) {
             this.camera.takePictureAsync({base64 :true, quality:0}).then(data => {
@@ -104,42 +117,87 @@ export default class CameraScreen extends React.Component {
                     if (response.status !== 201)
                         throw new Error("Failed to upload image to S3");
                     console.log(response.body.postResponse.location);
-                    axios.post('https://vision.googleapis.com/v1/images:annotate?key='+API, {
-                            "requests":[
-                                {
-                                    "image":{
-                                        "source":{
-                                            "imageUri": response.body.postResponse.location
-                                        }
-                                    },
+                    // axios.post('https://vision.googleapis.com/v1/images:annotate?key='+API, {
+                    //         "requests":[
+                    //             {
+                    //                 "image":{
+                    //                     "source":{
+                    //                         "imageUri": response.body.postResponse.location
+                    //                     }
+                    //                 },
+                    //
+                    //                 "features":[
+                    //                     {
+                    //                         "type":"WEB_DETECTION",
+                    //                         "maxResults":10
+                    //                     },
+                    //                     {
+                    //                         "type":"LABEL_DETECTION",
+                    //                         "maxResults":10
+                    //                     }
+                    //                 ]
+                    //             }
+                    //         ]
 
-                                    "features":[
-                                        {
-                                            "type":"WEB_DETECTION",
-                                            "maxResults":10
-                                        },
-                                        {
-                                            "type":"LABEL_DETECTION",
-                                            "maxResults":10
-                                        }
-                                    ]
-                                }
-                            ]
-                    }).then(function (response) {
-                            console.log(response.data);
-                            axios.post('http://10.200.1.39:3001/api/parsecarstats',response.data)
-                                .then(function(api_response){
-                                    console.log(api_response)
+                    var image = {image: "https://1-photos7.motorcar.com/new-2018-honda-civic_coupe-lxmanual-8487-17212275-1-1024.jpg"};//response.body.postResponse.location};
+                    var xmlhttp = new XMLHttpRequest();
+                    var result;
 
-                                })
-                                .catch(function(err){
-                            console.log(err);
-                        })
+                    xmlhttp.onreadystatechange = function () {
+                        if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+                            result = xmlhttp.responseText;
+                            //console.log(result);
 
-                        })
-                            .catch(function (error) {
-                                console.log(error);
-                            });
+                        }
+                    }
+                    xmlhttp.addEventListener("loadend", loadEnd);
+
+                    function loadEnd(e) {
+                        console.log(result);
+                        axios.post('http://10.200.1.39:3001/api/parsecarstats',result)
+                            .then(function(api_response){
+                                console.log(api_response)
+                                // AsyncStorage.setItem('searchResult', `${result}`);
+                            })
+                            .catch(function(err){
+                                console.log(err);
+                                // AsyncStorage.setItem('searchResult', `${result}`);
+                            })
+                    }
+
+                    xmlhttp.open("POST", "https://dev.sighthoundapi.com/v1/recognition?objectType=vehicle");
+                    xmlhttp.setRequestHeader("Content-type", "application/json");
+                    xmlhttp.setRequestHeader("X-Access-Token", SIGHTHOUND);
+                    xmlhttp.send(JSON.stringify(image));
+                    // AsyncStorage.clear();
+                    // this.setState({loading:true});
+                    // _nextPage();
+                    // axios.post('https://dev.sighthoundapi.com/v1/recognition?objectType=vehicle', {
+                    //     "requestPayload": {
+                    //         "image":response.body.postResponse.location
+                    //     }
+                    // },{
+                    //     headers: {
+                    //         'Content-Type' : 'application/json',
+                    //         'X-Access-Token' : SIGHTHOUND
+                    //     }
+                    // }).then(function (response) {
+                    //     if(result){
+                    //         console.log(response.data);
+                    //         axios.post('http://10.200.1.39:3001/api/parsecarstats',response.data)
+                    //             .then(function(api_response){
+                    //                 console.log(api_response)
+                    //
+                    //             })
+                    //             .catch(function(err){
+                    //                 console.log(err);
+                    //             })
+                    //
+                    //     }
+                        // )
+                        //     .catch(function (error) {
+                        //         console.log(error);
+                        //     });
                 });
 
                     // FileSystem.moveAsync({
@@ -166,12 +224,15 @@ export default class CameraScreen extends React.Component {
             });
 
         }
-        this.props.navigation.navigate('Result');
     };
 
     // renderGallery() {
     //     return <GalleryScreen onPress={this.toggleView.bind(this)}/>;
     // }
+
+    renderResult() {
+        return <ResultScreen/>;
+    }
 
     renderNoPermissions() {
         return (
@@ -255,6 +316,10 @@ export default class CameraScreen extends React.Component {
                             height: 80,resizeMode:'center'}}
                             source={require('AwesomeProject/Media/Bulb.png')}/>
                     </TouchableOpacity>
+
+                </View>
+                <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center'}}>
+                    <ActivityIndicator animating ={this.state.loading} size="large" color='white' />
                 </View>
             </Camera>
         );
@@ -266,7 +331,9 @@ export default class CameraScreen extends React.Component {
             ? this.renderCamera()
             : this.renderNoPermissions();
         // const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
-        const content = cameraScreenContent
+        //const content = cameraScreenContent
+        const content = this.state.showResult ? this.renderResult() : cameraScreenContent;
+
         return <View style={styles.container}>{content}</View>;
     }
 }

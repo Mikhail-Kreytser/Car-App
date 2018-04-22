@@ -34,8 +34,13 @@ export default class ResultScreen extends React.Component{
                 imgSource: "http://shop.honda.com/images/2018/civic-sedan/shop/jelly-civicsedan.png",
             }
         }
+        // this._bootstrapAsync();
         // this.addToDealers = this.addToDealers.bind(this);
     }
+    // _bootstrapAsync = async () => {
+    //     // const searchResult = await AsyncStorage.getItem('searchResult');
+    //     console.log(searchResult)
+    // };
     static navigationOptions = {
         title: 'Results',
     };
